@@ -3,16 +3,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+ 
+    
+
 builder.Services.AddDbContext<BooksDB>(options =>
 {
-    options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));  
+    options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));
+
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("MyAzureDB"));
 
 });
 
 
 
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
 
  
@@ -31,12 +35,16 @@ if(app.Environment.IsDevelopment())
 //app.MapGet("/", MyHandler.Hello);
 
 app.MapGet("/books", async (BooksDB db) =>
+
 await db.Books.ToListAsync()
-)
-  
-    .Produces<List<Book>>(StatusCodes.Status200OK)
+)  
+.Produces<List<Book>>(StatusCodes.Status200OK)
 .WithName("GetAllBooks").WithTags("Getters");
- 
+
+
+
+
+
 app.Run();
 
  
