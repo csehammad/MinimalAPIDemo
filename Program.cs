@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
  
-    
-
 builder.Services.AddDbContext<BooksDB>(options =>
 {
     options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));
@@ -32,7 +30,8 @@ if(app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 
 }
-//app.MapGet("/", MyHandler.Hello);
+
+app.MapGet("/", MyHandler.Hello);
 
 app.MapGet("/books", async (BooksDB db) =>
 
