@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<BooksDB>(options =>
 {
-    options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));
+    options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));  
 
 });
 
@@ -39,7 +39,7 @@ await db.Books.ToListAsync()
  
 app.Run();
 
-app.UseHttpsRedirection();
+ 
 class MyHandler
 {
 public static string Hello()
