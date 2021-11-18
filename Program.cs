@@ -84,18 +84,20 @@ app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel use
     var token = tokenService.BuildToken(builder.Configuration["Jwt:Key"], builder.Configuration["Jwt:Issuer"], userDto);
     await response.WriteAsJsonAsync(new { token = token });
     return;
-});
+}).Produces(StatusCodes.Status200OK)
+.WithName("Login").WithTags("Accounts").RequireAuthorization();
 
 
 // Sample Endpoint 
 app.MapGet("/", () => "Hello! This is .NET 6 Minimal API Demo on Azure App Service").ExcludeFromDescription();
 
-app.MapGet("/doaction", (Func<string>)(
-    
+app.MapGet("/AuthorizedResource", (Func<string>)(
+
     [Authorize] () => "Action Succeeded")
-    
-    
-    );
+
+
+    ).Produces(StatusCodes.Status200OK)
+.WithName("Authorized").WithTags("Accounts").RequireAuthorization();
 
 //Get All Books from the Sql Server DB using Paged Methods
 app.MapGet("/books", async ( BooksDB db) =>
