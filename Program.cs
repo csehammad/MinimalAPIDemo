@@ -1,23 +1,19 @@
 using Azure.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
- 
 builder.Services.AddDbContext<BooksDB>(options =>
 {
     options.UseSqlServer(Environment.GetEnvironmentVariable("AzureConnectionString"));
 
-    //options.UseSqlServer(builder.Configuration.GetConnectionString("MyAzureDB"));
-
 });
-
 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
- 
 
 
 var app = builder.Build();
@@ -32,12 +28,24 @@ app.MapGet("/", MyHandler.Hello);
 app.MapGet("/books", async (BooksDB db) =>
 
 await db.Books.ToListAsync()
+
 )  
 .Produces<List<Book>>(StatusCodes.Status200OK)
 .WithName("GetAllBooks").WithTags("Getters");
 
 
+app.MapPost("/books",
+    async ([FromBody] Book addbook,[FromServices] BooksDB db, HttpResponse response) =>
+    {
+        db.Books.Add(addbook);
+        await db.SaveChangesAsync();
+        response.StatusCode = 200;
+        response.Headers.Location = $"books/{addbook.BookID}";
 
+    })
+.Accepts<Book>("application/json")
+.Produces<Book>(StatusCodes.Status201Created)
+.WithName("AddNewBook").WithTags("Setters");
 
 
 app.Run();
@@ -55,7 +63,7 @@ public static string Hello()
 }
 public class Book
 { 
-public int BookID { get; set; }
+public int BookID { get;  }
 public string? Title { get; set; }
 
     public int Year { get; set; }
@@ -64,11 +72,6 @@ public string? Title { get; set; }
     public short Price { get; set; }
 
     public int AuthorID { get; set; }
-
-
-
-
-
 }
 
 class BooksDB : DbContext
