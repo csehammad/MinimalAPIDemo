@@ -128,3 +128,4 @@ L:\WorkSpace\Medium\Pocs\MinimalAPIs\obj\Debug\net6.0\APIDemo.dll
 L:\WorkSpace\Medium\Pocs\MinimalAPIs\obj\Debug\net6.0\ref\APIDemo.dll
 L:\WorkSpace\Medium\Pocs\MinimalAPIs\obj\Debug\net6.0\APIDemo.pdb
 L:\WorkSpace\Medium\Pocs\MinimalAPIs\obj\Debug\net6.0\APIDemo.genruntimeconfig.cache
+L:\WorkSpace\Medium\Pocs\MinimalAPIs\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

@@ -1,5 +1,10 @@
 using APIDemo.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 //Create WebApplication Builder 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,21 +20,82 @@ builder.Services.AddDbContext<BooksDB>(options =>
 
 //Inject Swagger Services 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "JWT Authentication",
+        Description = "Enter JWT Bearer token **_only_**",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer", // must be lower case
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {securityScheme, new string[] { }}
+    });
+});
 
+builder.Services.AddSingleton<ITokenService>(new TokenService());
+builder.Services.AddSingleton<IUserRepositoryService>(new UserRepositoryService());
 
-var app = builder.Build();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+await using var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 
 
 //Use Swagger in application. 
 app.UseSwagger();
 app.UseSwaggerUI();
 
+ 
+
+app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel userModel,  ITokenService tokenService, IUserRepositoryService userRepositoryService, HttpResponse response) => {
+   // var userModel = await http.Request.ReadFromJsonAsync<UserModel>();
+    var userDto = userRepositoryService.GetUser(userModel);
+    if (userDto == null)
+    {
+        response.StatusCode = 401;
+        return;
+    }
+
+    var token = tokenService.BuildToken(builder.Configuration["Jwt:Key"], builder.Configuration["Jwt:Issuer"], userDto);
+    await response.WriteAsJsonAsync(new { token = token });
+    return;
+});
+
 
 // Sample Endpoint 
 app.MapGet("/", () => "Hello! This is .NET 6 Minimal API Demo on Azure App Service").ExcludeFromDescription();
 
-
+app.MapGet("/doaction", (Func<string>)(
+    
+    [Authorize] () => "Action Succeeded")
+    
+    
+    );
 
 //Get All Books from the Sql Server DB using Paged Methods
 app.MapGet("/books", async ( BooksDB db) =>
@@ -41,7 +107,7 @@ await db.Books.ToListAsync()
 
 )
 .Produces<List<Book>>(StatusCodes.Status200OK)
-.WithName("GetAllBooks").WithTags("Getters");
+.WithName("GetAllBooks").WithTags("Getters").RequireAuthorization();
 
 
 
