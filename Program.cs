@@ -48,7 +48,7 @@ class MyHandler
 public static string Hello()
     { 
         
-        return "Hello World!";
+        return "Hello! This is .NET 6 Minimal API Demo on Azure App Service";
 
 
     }
