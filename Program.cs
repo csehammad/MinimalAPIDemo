@@ -100,7 +100,7 @@ app.MapGet("/AuthorizedResource", (Func<string>)(
 .WithName("Authorized").WithTags("Accounts").RequireAuthorization();
 
 //Get All Books from the Sql Server DB using Paged Methods
-app.MapGet("/books", async ( BooksDB db) =>
+app.MapGet("/books", [AllowAnonymous] async ( BooksDB db) =>
 
 await db.Books.ToListAsync()
 
@@ -132,7 +132,7 @@ await db.Books
 
 // Add new book to Sql Server DB 
 app.MapPost("/books",
-    async ([FromBody] Book addbook,[FromServices] BooksDB db, HttpResponse response) =>
+    [AllowAnonymous] async ([FromBody] Book addbook,[FromServices] BooksDB db, HttpResponse response) =>
     {
         db.Books.Add(addbook);
         await db.SaveChangesAsync();
@@ -147,7 +147,7 @@ app.MapPost("/books",
 
 // Update existing book title
 app.MapPut("/books",
-    async (int bookID,string bookTitle, [FromServices] BooksDB db, HttpResponse response) =>
+     [AllowAnonymous] async (int bookID,string bookTitle, [FromServices] BooksDB db, HttpResponse response) =>
     {
         var mybook = db.Books.SingleOrDefault(s => s.BookID == bookID);
 
@@ -164,8 +164,8 @@ app.MapPut("/books",
 .WithName("UpdateBook").WithTags("Setters");
 
 
-app.MapGet("/books/search/{query}",
-    (string query, BooksDB db) =>
+app.MapGet("/books/search/{query}", [AllowAnonymous]
+(string query, BooksDB db) =>
     {
         var _selectedBooks = db.Books.Where(x => x.Title.ToLower().Contains(query.ToLower())).ToList();
 
