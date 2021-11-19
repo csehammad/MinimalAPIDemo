@@ -1,4 +1,6 @@
 using APIDemo.Models;
+using APIDemo.Models.Tokens;
+using APIDemo.Models.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddSingleton<ITokenService>(new TokenService());
+builder.Services.AddSingleton<TokenService>(new TokenService());
 builder.Services.AddSingleton<IUserRepositoryService>(new UserRepositoryService());
 
 builder.Services.AddAuthorization();
@@ -72,7 +74,7 @@ app.UseSwaggerUI();
 
  
 
-app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel userModel,  ITokenService tokenService, IUserRepositoryService userRepositoryService, HttpResponse response) => {
+app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel userModel,  TokenService tokenService, IUserRepositoryService userRepositoryService, HttpResponse response) => {
    // var userModel = await http.Request.ReadFromJsonAsync<UserModel>();
     var userDto = userRepositoryService.GetUser(userModel);
     if (userDto == null)
@@ -100,16 +102,23 @@ app.MapGet("/AuthorizedResource", (Func<string>)(
 .WithName("Authorized").WithTags("Accounts").RequireAuthorization();
 
 //Get All Books from the Sql Server DB using Paged Methods
-app.MapGet("/books", [AllowAnonymous] async ( BooksDB db) =>
+app.MapGet("/books", async (BooksDB db) =>
 
-await db.Books.ToListAsync()
-
-
-//await db.Books.ToListAsync()
+ await db.Books.ToListAsync()
 
 )
 .Produces<List<Book>>(StatusCodes.Status200OK)
-.WithName("GetAllBooks").WithTags("Getters").RequireAuthorization();
+.WithName("GetAllBooks").WithTags("Getters");
+
+//Get Books by ID from the Sql Server DB 
+app.MapGet("/books/{id}", async (BooksDB db, int id) =>
+
+   await db.Books.SingleOrDefaultAsync(s => s.BookID == id) is Book mybook ? Results.Ok(mybook)
+   : Results.NotFound()
+
+ )
+.Produces<Book>(StatusCodes.Status200OK)
+.WithName("GetBookbyID").WithTags("Getters");
 
 
 
@@ -159,13 +168,13 @@ app.MapPut("/books",
         return Results.Ok();
 
     })
-.Accepts<Book>("application/json")
-.Produces<Book>(StatusCodes.Status201Created)
+
+.Produces<Book>(StatusCodes.Status201Created).Produces(StatusCodes.Status404NotFound)
 .WithName("UpdateBook").WithTags("Setters");
 
 
-app.MapGet("/books/search/{query}", [AllowAnonymous]
-(string query, BooksDB db) =>
+app.MapGet("/books/search/{query}",
+    (string query, BooksDB db) =>
     {
         var _selectedBooks = db.Books.Where(x => x.Title.ToLower().Contains(query.ToLower())).ToList();
 
