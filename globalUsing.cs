@@ -1,0 +1,13 @@
+﻿global using APIDemo.Models;
+global using APIDemo.Models.Tokens;
+global using APIDemo.Models.Users;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.OpenApi.Models;
+global using System.Text;
+global using Microsoft.EntityFrameworkCore;
+global using System.ComponentModel.DataAnnotations;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;

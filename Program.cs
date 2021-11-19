@@ -1,12 +1,4 @@
-using APIDemo.Models;
-using APIDemo.Models.Tokens;
-using APIDemo.Models.Users;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
+
 
 //Create WebApplication Builder 
 var builder = WebApplication.CreateBuilder(args);
@@ -165,7 +157,7 @@ app.MapPut("/books",
         mybook.Title = bookTitle;
         
         await db.SaveChangesAsync();
-        return Results.Ok();
+        return Results.Created("/books",mybook);
 
     })
 
