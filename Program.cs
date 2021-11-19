@@ -72,10 +72,10 @@ app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 
- 
 
-app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel userModel,  TokenService tokenService, IUserRepositoryService userRepositoryService, HttpResponse response) => {
-   // var userModel = await http.Request.ReadFromJsonAsync<UserModel>();
+
+app.MapPost("/login", [AllowAnonymous] async ([FromBodyAttribute] UserModel userModel, TokenService tokenService, IUserRepositoryService userRepositoryService, HttpResponse response) =>
+{
     var userDto = userRepositoryService.GetUser(userModel);
     if (userDto == null)
     {
@@ -87,7 +87,7 @@ app.MapPost("/login",   [AllowAnonymous] async ([FromBodyAttribute]UserModel use
     await response.WriteAsJsonAsync(new { token = token });
     return;
 }).Produces(StatusCodes.Status200OK)
-.WithName("Login").WithTags("Accounts").RequireAuthorization();
+.WithName("Login").WithTags("Accounts");
 
 
 // Sample Endpoint 
