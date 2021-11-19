@@ -6,4 +6,6 @@ This project demonstrates the following:
 - How to create a CRUD APIs in .NET6 using Minimal APIS. 
 - How to add OpenAPI Specifications using Swagger
 - How to Secure Minimal APIs using JWT Authentication
+
+Swagger Specs:
 ![API Demo](https://github.com/csehammad/MinimalAPIDemo/blob/main/Img/Minimal%20API%20in%20DotNET6.png?raw=true)
